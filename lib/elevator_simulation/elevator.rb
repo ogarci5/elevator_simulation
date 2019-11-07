@@ -16,20 +16,28 @@ module ElevatorSimulation
         @elevators
       end
 
-      def prepare_elevators(number: 1)
+      def prepare(number: 1)
         @elevators = number.times.map { |n| Elevator.new(n) }
       end
 
       def request(request_floor:, destination_floor:)
+        return false if @elevators.any?(:available?)
+
         ElevatorSimulation.logger.info "Elevator requested at floor #{request_floor} to go to floor #{destination_floor}"
+
         # Find first elevator that's closest to that floor
-        elevator = find_closest_elevator(floor: request_floor)
+        elevator = find_closest(floor: request_floor)
         elevator.goto(request_floor: request_floor, destination_floor: destination_floor)
         elevator.details
       end
 
-      def find_closest_elevator(floor:)
+      def find_closest(floor:)
         @elevators.min_by { |elevator| [elevator.distance_from_floor(floor), elevator.id] }
+      end
+
+      def update_all
+        time = Time.now.to_f
+        @elevators.each { |elevator| elevator.update(time) }
       end
     end
 
@@ -41,7 +49,6 @@ module ElevatorSimulation
       @trips = 0
       @state = :idle
       @door_state = :closed
-      @start_trip_time
     end
 
     def running?
@@ -56,6 +63,10 @@ module ElevatorSimulation
       @state == :unavailable
     end
 
+    def available?
+      !unavailable?
+    end
+
     def doors_open?
       @door_state = :open
     end
@@ -64,11 +75,38 @@ module ElevatorSimulation
       @door_state = :closed
     end
 
-    def request
-    end
+    def update(time)
+      if doors_open?
+        wait_time = (@door_timer + WAIT_TIME).round
+        if wait_time == time.round
+          @door_state = :closed
+          @door_timer = nil
 
-    def update
+          # We have reached the destination
+          if @destination_floor == @current_floor
+            @trips += 1
+            @trip_timer = nil
+            @state = :idle
+            if @trips >= 100
+              @state = :unavailable
+            end
+          end
+        end
+      else
+        # doors closed
+        distance = VELOCITY * (time - @movement_timer).round
+        if @direction == :up
+          @current_floor += distance
+        elsif @direction == :down
+          @current_floor -= distance
+        end
 
+        # We have reached the destination
+        if @destination_floor == @current_floor
+          @door_state = :open
+          @door_timer = time
+        end
+      end
     end
 
     def distance_from_floor(floor)
@@ -78,9 +116,11 @@ module ElevatorSimulation
     def goto(request_floor:, destination_floor:)
       time = Time.now.to_f
       @trip_timer = time
+      @movement_timer = time
       @request_floor = request_floor
       @destination_floor = destination_floor
       @state = :running
+      @direction = (@destination_floor - @current_floor).positive? ? :up : :down
 
       if distance_from_floor(@request_floor) == 0
         @door_state = :open
@@ -89,7 +129,12 @@ module ElevatorSimulation
     end
 
     def details
-      logger.info "id: #{id}, current_floor: #{@current_floor}, trips: #{@trips}, state: #{@state}, trip_timer: #{@trip_timer}, door_state: #{@door_state}, door_timer: #{@door_timer.to_i}, request_floor: #{@request_floor}, destination_floor: #{@destination_floor}"
+      details = <<-DETAILS
+        id: #{id}, current_floor: #{@current_floor}, trips: #{@trips}, state: #{@state}, trip_timer: #{@trip_timer}, 
+        movement_timer: #{@movement_timer}, direction: #{@direction}, door_state: #{@door_state}, door_timer: #{@door_timer.to_i}, 
+        request_floor: #{@request_floor}, destination_floor: #{@destination_floor}"
+      DETAILS
+      logger.info details
     end
   end
 end

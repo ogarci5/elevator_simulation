@@ -18,8 +18,9 @@ module ElevatorSimulation
     end
 
     def start
-      Elevator.prepare_elevators(number: @elevators)
+      Elevator.prepare(number: @elevators)
 
+      # We assume here that actions happen every second
       loop do
         request_floor = Random.rand(@floors) + 1
         destination_floor = Random.rand(@floors) + 1
@@ -29,9 +30,12 @@ module ElevatorSimulation
           destination_floor = Random.rand(@floors) + 1
         end
 
-        Elevator.request(request_floor: request_floor, destination_floor: destination_floor)
+        result = Elevator.request(request_floor: request_floor, destination_floor: destination_floor)
+        break if result
 
         sleep 1
+
+        Elevator.update_all
       end
     end
   end
