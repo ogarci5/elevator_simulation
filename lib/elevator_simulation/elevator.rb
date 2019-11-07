@@ -70,11 +70,11 @@ module ElevatorSimulation
     end
 
     def doors_open?
-      @door_state = :open
+      @door_state == :open
     end
 
     def doors_closed?
-      @door_state = :closed
+      @door_state == :closed
     end
 
     def update(time)
@@ -137,8 +137,8 @@ module ElevatorSimulation
 
     def details
       details = <<~DETAILS
-        id: #{id}, current_floor: #{@current_floor}, trips: #{@trips}, state: #{@state}, trip_timer: #{@trip_timer}, 
-        movement_timer: #{@movement_timer}, direction: #{@direction}, door_state: #{@door_state}, door_timer: #{@door_timer.to_i}, 
+        id: #{id}, current_floor: #{@current_floor}, trips: #{@trips}, state: #{@state}, trip_timer: #{@trip_timer&.round}, 
+        movement_timer: #{@movement_timer&.round}, direction: #{@direction}, door_state: #{@door_state}, door_timer: #{@door_timer&.round}, 
         request_floor: #{@request_floor}, destination_floor: #{@destination_floor}
       DETAILS
       logger.info details
