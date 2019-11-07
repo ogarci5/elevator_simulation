@@ -1,15 +1,13 @@
-require 'logger'
-require 'json'
-require 'csv'
-
 module ElevatorSimulation
-  class Runner
-    attr_reader :logger
+  class Simulation
+    MINIMUM_FLOOR = 1
+
+    attr_reader :logger, :options
 
     def initialize(options)
       @options = options
-      @elevators = options[:elevators]
-      @floors = options[:floors]
+      @elevators = options[:elevators] || 1
+      @floors = options[:floors] || 2
       @logger = ElevatorSimulation.logger
 
       if options[:verbose] || options[:verbosity] > 0
@@ -19,8 +17,10 @@ module ElevatorSimulation
       end
     end
 
-    def run
-      #call stuff here
+    def start
+      @elevators = @elevators.times.map do |id|
+        Elevator.new(id)
+      end
     end
   end
 end

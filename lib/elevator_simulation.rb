@@ -1,3 +1,5 @@
+require 'elevator_simulation/elevator'
+require 'elevator_simulation/simulation'
 require 'elevator_simulation/version'
 require 'optparse'
 
@@ -40,8 +42,8 @@ module ElevatorSimulation
 
     # default options
     options[:verbosity] ||= 0
-    runner = Runner.new(options)
-    runner.run
+    simulation = Simulation.new(options)
+    simulation.start
   end
 
   def self.logger
