@@ -3,6 +3,45 @@ require 'optparse'
 
 module ElevatorSimulation
   def self.parse(arguments)
+    options = {}
+    OptionParser.new do |parser|
+      parser.banner = 'Usage: elevator_simulation command [options]'
+      parser.separator ''
+      parser.separator 'Specific options:'
+
+      parser.on('--elevators NUMBER', Integer, 'Set the number of elevators') do |n|
+        options[:elevators] = n
+      end
+
+      parser.on('--floors NUMBER', Integer, 'Set the number of floors') do |n|
+        options[:floors] = n
+      end
+
+      parser.on('-v', '--[no-]verbose', 'Run verbosely') do |v|
+        options[:verbose] = v
+      end
+
+      parser.on('--verbosity LEVEL', Integer, 'Set verbosity level') do |v|
+        options[:verbosity] = v
+      end
+
+      parser.on('--version', 'Show the installed version') do
+        puts VERSION
+        exit
+      end
+
+      parser.on('-h', '--help', 'Display this screen') do
+        puts parser
+        exit
+      end
+
+      parser.parse!(arguments)
+    end
+
+    # default options
+    options[:verbosity] ||= 0
+    runner = Runner.new(options)
+    runner.run
   end
 
   def self.logger
