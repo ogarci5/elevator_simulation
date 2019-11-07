@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+
+require 'elevator_simulation'
+ElevatorSimulation.parse(ARGV)
