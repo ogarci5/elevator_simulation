@@ -18,8 +18,13 @@ module ElevatorSimulation
     end
 
     def start
-      @elevators = @elevators.times.map do |id|
-        Elevator.new(id)
+      Elevator.prepare_elevators(number: @elevators)
+
+      loop do
+        random_floor = Random.rand(@floors) + 1
+        Elevator.request(floor: random_floor)
+
+        sleep 1
       end
     end
   end
