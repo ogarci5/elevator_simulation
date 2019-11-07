@@ -1,13 +1,13 @@
 module ElevatorSimulation
   class Elevator
-    # One floor moved per 10 seconds.
-    VELOCITY = 0.1
+    # One floor moved per second.
+    VELOCITY = 1
     # Wait time at a floor for people to get in and out.
-    WAIT_TIME = 30
+    WAIT_TIME = 3
     # Maximum number of trips before maintenance is needed
     MAXIMUM_TRIPS = 100
 
-    attr_reader :id, :current_floor, :trips, :logger
+    attr_reader :id, :current_floor, :state, :trips, :logger
 
     class << self
       attr_reader :elevators
@@ -20,8 +20,16 @@ module ElevatorSimulation
         @elevators = number.times.map { |n| Elevator.new(n) }
       end
 
-      def request(floor:)
-        # DO stuff
+      def request(request_floor:, destination_floor:)
+        ElevatorSimulation.logger.info "Elevator requested at floor #{request_floor} to go to floor #{destination_floor}"
+        # Find first elevator that's closest to that floor
+        elevator = find_closest_elevator(floor: request_floor)
+        elevator.goto(request_floor: request_floor, destination_floor: destination_floor)
+        elevator.details
+      end
+
+      def find_closest_elevator(floor:)
+        @elevators.min_by { |elevator| [elevator.distance_from_floor(floor), elevator.id] }
       end
     end
 
@@ -29,7 +37,59 @@ module ElevatorSimulation
       @id = id
       @logger = ElevatorSimulation.logger
       @current_floor = 1
+
       @trips = 0
+      @state = :idle
+      @door_state = :closed
+      @start_trip_time
+    end
+
+    def running?
+      @state == :running
+    end
+
+    def idle?
+      @state == :idle
+    end
+
+    def unavailable?
+      @state == :unavailable
+    end
+
+    def doors_open?
+      @door_state = :open
+    end
+
+    def doors_closed?
+      @door_state = :closed
+    end
+
+    def request
+    end
+
+    def update
+
+    end
+
+    def distance_from_floor(floor)
+      @current_floor - floor
+    end
+
+    def goto(request_floor:, destination_floor:)
+      time = Time.now.to_f
+      @trip_timer = time
+      @request_floor = request_floor
+      @destination_floor = destination_floor
+      @state = :running
+
+      if distance_from_floor(@request_floor) == 0
+        @door_state = :open
+        @door_timer = time
+      end
+    end
+
+    def details
+      logger.info "id: #{id}, current_floor: #{@current_floor}, trips: #{@trips}, state: #{@state}, trip_timer: #{@trip_timer}, door_state: #{@door_state}, door_timer: #{@door_timer.to_i}, request_floor: #{@request_floor}, destination_floor: #{@destination_floor}"
     end
   end
 end

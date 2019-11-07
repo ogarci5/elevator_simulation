@@ -21,8 +21,15 @@ module ElevatorSimulation
       Elevator.prepare_elevators(number: @elevators)
 
       loop do
-        random_floor = Random.rand(@floors) + 1
-        Elevator.request(floor: random_floor)
+        request_floor = Random.rand(@floors) + 1
+        destination_floor = Random.rand(@floors) + 1
+
+        # To make sure we are requesting a different floor
+        while request_floor == destination_floor
+          destination_floor = Random.rand(@floors) + 1
+        end
+
+        Elevator.request(request_floor: request_floor, destination_floor: destination_floor)
 
         sleep 1
       end
