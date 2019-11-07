@@ -31,7 +31,7 @@ module ElevatorSimulation
         end
 
         result = Elevator.request(request_floor: request_floor, destination_floor: destination_floor)
-        break if result
+        break unless result
 
         sleep 1
 

@@ -29,6 +29,8 @@ module ElevatorSimulation
         elevator = find_closest(floor: request_floor)
         elevator.goto(request_floor: request_floor, destination_floor: destination_floor)
         elevator.details
+
+        true
       end
 
       def find_closest(floor:)
@@ -76,6 +78,11 @@ module ElevatorSimulation
     end
 
     def update(time)
+      return if idle?
+
+      logger.info "updating elevator #{id}"
+      details
+
       if doors_open?
         wait_time = (@door_timer + WAIT_TIME).round
         if wait_time == time.round
@@ -129,10 +136,10 @@ module ElevatorSimulation
     end
 
     def details
-      details = <<-DETAILS
+      details = <<~DETAILS
         id: #{id}, current_floor: #{@current_floor}, trips: #{@trips}, state: #{@state}, trip_timer: #{@trip_timer}, 
         movement_timer: #{@movement_timer}, direction: #{@direction}, door_state: #{@door_state}, door_timer: #{@door_timer.to_i}, 
-        request_floor: #{@request_floor}, destination_floor: #{@destination_floor}"
+        request_floor: #{@request_floor}, destination_floor: #{@destination_floor}
       DETAILS
       logger.info details
     end

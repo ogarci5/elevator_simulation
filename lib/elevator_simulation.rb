@@ -2,6 +2,7 @@ require 'elevator_simulation/elevator'
 require 'elevator_simulation/simulation'
 require 'elevator_simulation/version'
 require 'optparse'
+require 'logger'
 
 module ElevatorSimulation
   def self.parse(arguments)
