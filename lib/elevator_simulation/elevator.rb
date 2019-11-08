@@ -115,6 +115,7 @@ module ElevatorSimulation
 
         # We have reached the destination
         if @destination_floor == @current_floor
+          @movement_timer = nil
           @door_state = :open
           @door_timer = time
         end
