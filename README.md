@@ -6,19 +6,20 @@ TODO: Delete this and the text above, and describe your gem
 
 ## Installation
 
-Add this line to your application's Gemfile:
+You can test this by pulling the repo and running
 
-```ruby
-gem 'elevator_simulation'
+```
+$ gem build elevator_simulation.gemspec
+$ gem install -f -l elevator_simulation-0.0.1.gem
 ```
 
-And then execute:
+To test the script execute:
 
-    $ bundle
+    $ elevator_simulation --elevators 1 --floors 3 --verbose
+    
+Run this to see more flags:
 
-Or install it yourself as:
-
-    $ gem install elevator_simulation
+    $ elevator_simulation --help
 
 ## Usage
 
