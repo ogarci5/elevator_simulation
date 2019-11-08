@@ -21,7 +21,7 @@ module ElevatorSimulation
       end
 
       def request(request_floor:, destination_floor:)
-        return false if @elevators.any?(:available?)
+        return false unless @elevators.any?(&:available?)
 
         ElevatorSimulation.logger.info "Elevator requested at floor #{request_floor} to go to floor #{destination_floor}"
 
@@ -34,6 +34,10 @@ module ElevatorSimulation
       end
 
       def find_closest(floor:)
+        # Needs to be improved to prioritize
+        # 1. Idle
+        # 2. Closest going the same direction
+        # 3. Closest going opposite direction
         @elevators.min_by { |elevator| [elevator.distance_from_floor(floor), elevator.id] }
       end
 
@@ -77,6 +81,7 @@ module ElevatorSimulation
       @door_state == :closed
     end
 
+    # TODO Split this out into different methods
     def update(time)
       return if idle?
 
@@ -94,7 +99,7 @@ module ElevatorSimulation
             @trips += 1
             @trip_timer = nil
             @state = :idle
-            if @trips >= 100
+            if @trips >= MAXIMUM_TRIPS
               @state = :unavailable
             end
           end
